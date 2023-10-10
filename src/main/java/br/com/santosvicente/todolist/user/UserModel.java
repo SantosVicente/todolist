@@ -1,44 +1,31 @@
 package br.com.santosvicente.todolist.user;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import org.hibernate.annotations.CreationTimestamp;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import lombok.Data;
+
+@Data // cria os getters e o setters pelo Lombok LIB
+@Entity(name = "tb_users")
 public class UserModel {
+
+  @Id
+  @GeneratedValue(generator = "UUID")
+  private UUID id;
+
   private String name;
+
+  @Column(unique = true)
   private String username;
   private String password;
 
-  public UserModel(String name, String username, String password) {
-    this.name = name;
-    this.username = username;
-    this.password = password;
-  }
+  @CreationTimestamp
+  private LocalDateTime createdAt;
 
-  public String getName() {
-    return this.name;
-  }
-
-  public String getUsername() {
-    return this.username;
-  }
-
-  public String getPassword() {
-    return this.password;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public void setUsername(String username) {
-    this.username = username;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
-  }
-
-  @Override
-  public String toString() {
-    String returnString = "Name: " + this.name + "\nUsername: " + this.username + "\nPassword: " + this.password;
-
-    return returnString;
-  }
 }
