@@ -24,32 +24,39 @@ public class FilterTaskAuth extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
 
-    var header = request.getHeader("Authorization");
+    var servletPath = request.getServletPath();
 
-    var token = header.substring("Basic".length()).trim();
+    if (servletPath.startsWith("/tasks/")) {
+      var header = request.getHeader("Authorization");
 
-    var decoded = new String(Base64.getDecoder().decode(token));
+      var token = header.substring("Basic".length()).trim();
 
-    var username = decoded.split(":")[0];
-    var password = decoded.split(":")[1];
+      var decoded = new String(Base64.getDecoder().decode(token));
 
-    var userExists = this.userRepository.findByUsername(username);
+      var username = decoded.split(":")[0];
+      var password = decoded.split(":")[1];
 
-    if (userExists == null) {
-      response.sendError(401);
-      return;
-    } else {
-      var passwordHashed = userExists.getPassword();
+      var userExists = this.userRepository.findByUsername(username);
 
-      var passwordIsCorrect = BCrypt.verifyer().verify(password.toCharArray(),
-          passwordHashed);
-
-      if (passwordIsCorrect.verified) {
-        filterChain.doFilter(request, response);
-      } else {
+      if (userExists == null) {
         response.sendError(401);
         return;
+      } else {
+        var passwordHashed = userExists.getPassword();
+
+        var passwordIsCorrect = BCrypt.verifyer().verify(password.toCharArray(),
+            passwordHashed);
+
+        if (passwordIsCorrect.verified) {
+          request.setAttribute("idUser", userExists.getId());
+          filterChain.doFilter(request, response);
+        } else {
+          response.sendError(401);
+          return;
+        }
       }
+    } else {
+      filterChain.doFilter(request, response);
     }
   }
 }
