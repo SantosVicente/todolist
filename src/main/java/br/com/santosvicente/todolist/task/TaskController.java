@@ -54,6 +54,14 @@ public class TaskController {
 
     var task = this.taskRepository.findById(id).orElse(null);
 
+    if (task == null) {
+      return ResponseEntity.status(404).body("Tarefa não encontrada");
+    }
+
+    if (!task.getIdUser().equals(idUser)) {
+      return ResponseEntity.status(403).body("Você não tem permissão para alterar essa tarefa");
+    }
+
     Utils.copyNonNullProperties(taskModel, task);
 
     var data = this.taskRepository.save(task);
